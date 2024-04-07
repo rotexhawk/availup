@@ -263,22 +263,23 @@ start_avail() {
     # Now using an endless loop to ensure continuous operation
     while true; do
         $AVAIL_BIN --config $CONFIG --app-id $APPID --identity $IDENTITY
-        echo "🔄 Avail client stopped. Restarting..."
-        sleep 1 # Brief pause before restarting to prevent issues with rapid restarts
+        status=$?
+        if [ $status -ne 0 ]; then
+            echo "Error detected with Avail client, attempting to restart..."
+        fi
+        sleep 1
     done
 }
 
 onexit() {
     chmod 600 $IDENTITY
-    # Removing user instructions and exit call
-    # Simplify or remove the PATH check if not necessary for restarting
+    echo "🔄 Avail stopped. Future instances of the light client can be started by invoking the avail-light binary or rerunning this script$EXTRAPROMPT"
     if [[ ":$PATH:" != *":$HOME/.avail/bin:"* ]]; then
         if ! grep -q "export PATH=\"\$PATH:$HOME/.avail/bin\"" "$PROFILE"; then
             echo -e "export PATH=\"\$PATH:$HOME/.avail/bin\"\n" >>$PROFILE
-            echo "📌 Avail has been added to your PATH. Please restart your terminal for this to take effect."
         fi
+        echo -e "📌 Avail has been added to your profile. Run the following command to load it in the current session:\n. $PROFILE\n"
     fi
-    # Not calling exit here allows the script to continue/restart as intended
 }
 
 # Main script execution starts here
@@ -293,7 +294,7 @@ check_avail_light
 install_avail
 
 # Setup trap to handle graceful exits and restarts
-trap onexit EXIT
+trap onexit EXIT SIGINT SIGTERM
 
 # Start the Avail client in a loop
 start_avail
