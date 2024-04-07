@@ -258,18 +258,6 @@ install_avail(){
     fi
 }
 
-onexit() {
-    chmod 600 $IDENTITY
-    echo "🔄 Avail stopped. Future instances of the light client can be started by invoking the avail-light binary or rerunning this script$EXTRAPROMPT"
-    if [[ ":$PATH:" != *":$HOME/.avail/bin:"* ]]; then
-        if ! grep -q "export PATH=\"\$PATH:$HOME/.avail/bin\"" "$PROFILE"; then
-            echo -e "export PATH=\"\$PATH:$HOME/.avail/bin\"\n" >>$PROFILE
-        fi
-        echo -e "📌 Avail has been added to your profile. Run the following command to load it in the current session:\n. $PROFILE\n"
-    fi
-    exit 0
-}
-
 start_avail() {
     echo "🧱 Starting Avail."
     # Now using an endless loop to ensure continuous operation
